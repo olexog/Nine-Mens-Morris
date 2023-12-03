@@ -90,8 +90,8 @@ void MainWindow::on_actionConnect_triggered()
     // Bekerjuk a masik gep cimet. Ha ez nem nulla hosszusagu, akkor kapcsolodunk hozza.
     bool ok;
     QString addr = QInputDialog::getText(this,
-                                         "Server address", "Please enter the server host:",
-                                         QLineEdit::Normal, "localhost", &ok);
+      "Server address", "Please enter the server host:",
+      QLineEdit::Normal, "localhost", &ok);
     if(ok && !addr.isEmpty())
     {
         m_pNetHandler->Connect(addr);

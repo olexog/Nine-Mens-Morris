@@ -1,7 +1,7 @@
 #include "server.h"
 
 Server::Server(QObject *parent) :
-    QObject(parent)
+        QObject(parent)
 {
     m_pServSocket = NULL;
     m_pSocket1 = NULL;
@@ -25,7 +25,7 @@ void Server::StartServer()
 
     m_pServSocket = new QTcpServer();
     if (!m_pServSocket->listen(
-            QHostAddress::Any, 3490)) {
+                QHostAddress::Any, 3490)) {
         delete m_pServSocket;
         m_pServSocket = NULL;
         return;
@@ -41,7 +41,7 @@ void Server::StartServer()
 void Server::slotIncomingConn()
 {
     QTcpSocket* pSocket =
-        m_pServSocket->nextPendingConnection();
+            m_pServSocket->nextPendingConnection();
 
     if ((m_pSocket1 != NULL) && (m_pSocket2 != NULL)) {
         delete pSocket;

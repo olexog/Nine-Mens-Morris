@@ -1,6 +1,5 @@
-#include "mainwindow.h"
-
 #include <QApplication>
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,5 +10,6 @@ int main(int argc, char *argv[])
 #else
     w.show();
 #endif
+
     return a.exec();
 }

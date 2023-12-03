@@ -1,14 +1,14 @@
-#ifndef NMMWIDGET_H
-#define NMMWIDGET_H
+#ifndef TTTWIDGET_H
+#define TTTWIDGET_H
 
 #include <QWidget>
 
-class NMMWidget : public QWidget
+class TTTWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    NMMWidget(QWidget* parent = 0, const char* name = 0);
+    TTTWidget(QWidget* parent = 0, const char* name = 0);
 
 signals:
     void signalStep(int x, int y);
@@ -28,4 +28,4 @@ protected:
     virtual void paintEvent(QPaintEvent* e);
 };
 
-#endif // NMMWIDGET_H
+#endif // TTTWIDGET_H

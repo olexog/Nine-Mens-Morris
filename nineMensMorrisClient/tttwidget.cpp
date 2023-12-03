@@ -1,13 +1,13 @@
 #include <QPainter>
 #include <QMouseEvent>
-#include "nmmwidget.h"
+#include "tttwidget.h"
 
-NMMWidget::NMMWidget(QWidget*, const char*)
+TTTWidget::TTTWidget(QWidget*, const char*)
 {
     Init();
 }
 
-void NMMWidget::Init()
+void TTTWidget::Init()
 {
     for (int i = 0; i < 9; ++i) {
         m_State[i] = 0;
@@ -24,13 +24,13 @@ void NMMWidget::Init()
     m_bCPlayer = false;
 }
 
-void NMMWidget::slotInit()
+void TTTWidget::slotInit()
 {
     Init();
     update();
 }
 
-void NMMWidget::slotState(bool cplayer, unsigned char* state)
+void TTTWidget::slotState(bool cplayer, unsigned char* state)
 {
     for (int i = 0; i < 9; ++i) {
         m_State[i] = state[i];
@@ -40,7 +40,7 @@ void NMMWidget::slotState(bool cplayer, unsigned char* state)
     update();
 }
 
-void NMMWidget::paintEvent(QPaintEvent* e)
+void TTTWidget::paintEvent(QPaintEvent* e)
 {
     int w = this->width();
     int h = this->height();
@@ -145,7 +145,7 @@ void NMMWidget::paintEvent(QPaintEvent* e)
     }
 }
 
-void NMMWidget::mousePressEvent(QMouseEvent* e)
+void TTTWidget::mousePressEvent(QMouseEvent* e)
 {
     if (!m_bCPlayer) return;
 
