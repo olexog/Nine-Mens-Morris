@@ -3,21 +3,31 @@
 
 #include <QMainWindow>
 
-QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
 }
-QT_END_NAMESPACE
+
+class NetHandler;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+public slots:
+    void slotConnectionStatus(int status);
+    void slotEnd(int res);
 
 private:
     Ui::MainWindow *ui;
+    NetHandler* m_pNetHandler;
+
+private slots:
+    void on_actionStop_triggered();
+    void on_actionConnect_triggered();
 };
+
 #endif // MAINWINDOW_H
