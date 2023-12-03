@@ -2,6 +2,7 @@
 #define TTTWIDGET_H
 
 #include <QWidget>
+#include <QVector2D>
 
 class TTTWidget : public QWidget
 {
@@ -20,12 +21,18 @@ public slots:
 protected:
     unsigned char m_State[9];
     unsigned char gameTable[24];
+    char selectedMan = -1;
     bool m_bCPlayer;
+    float borderMargin = 1.0f/16.0f;
+    float rectSpace = (1 - 2 * borderMargin) / 6.0f;
+    float manRelSize = 0.08f; // related to size of game table
 
 protected:
     void Init();
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void paintEvent(QPaintEvent* e);
+    QVector2D screenPosition(int c, int i, int size);
+
 };
 
 #endif // TTTWIDGET_H

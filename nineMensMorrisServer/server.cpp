@@ -62,6 +62,7 @@ void Server::slotIncomingConn()
                 this, SLOT(slotReadyRead2()));
     }
 
+    // játék kezdése
     if ((m_pSocket1 != NULL) && (m_pSocket2 != NULL))
         Init();
 }

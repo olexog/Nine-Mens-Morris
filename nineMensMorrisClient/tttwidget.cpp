@@ -40,6 +40,24 @@ void TTTWidget::slotState(bool cplayer, unsigned char* state)
     update();
 }
 
+QVector2D TTTWidget::screenPosition(int c, int i, int size)
+{
+    int xpos = 0;
+    if (i == 0 || i == 6 || i == 7) xpos = -1;
+    else if (i == 1 || i == 5) xpos = 0;
+    else if (i == 2 || i == 3 || i == 4) xpos = 1;
+
+    int ypos = 0;
+    if (i == 0 || i == 1 || i == 2) ypos = -1;
+    else if (i == 3 || i == 7) ypos = 0;
+    else if (i == 4 || i == 5 || i == 6) ypos = 1;
+
+    int xx = size / 2 + xpos * (3 - c) * rectSpace * size;
+    int yy = size / 2 + ypos * (3 - c) * rectSpace * size;
+
+    return QVector2D(xx,yy);
+}
+
 void TTTWidget::paintEvent(QPaintEvent* e)
 {
     int w = this->width();
@@ -83,28 +101,17 @@ void TTTWidget::paintEvent(QPaintEvent* e)
     QBrush whiteManBrush(Qt::gray);
 
     float emptyCircleSize = 0.02f * size;
-    float manSize = 0.08f * size;
+    float manSize = manRelSize * size;
 
     for (int c = 0; c < 3; c++)
     {
         for (int i = 0; i < 8; i++)
         {
-            int xpos = 0;
-            if (i == 0 || i == 6 || i == 7) xpos = -1;
-            else if (i == 1 || i == 5) xpos = 0;
-            else if (i == 2 || i == 3 || i == 4) xpos = 1;
-
-            int ypos = 0;
-            if (i == 0 || i == 1 || i == 2) ypos = -1;
-            else if (i == 3 || i == 7) ypos = 0;
-            else if (i == 4 || i == 5 || i == 6) ypos = 1;
-
-            int xx = size / 2 + xpos * (3 - c) * rectSpace * size;
-            int yy = size / 2 + ypos * (3 - c) * rectSpace * size;
+            QVector2D pos = screenPosition(c, i, size);
 
             painter.setPen(blackPen);
             painter.setBrush(QBrush(Qt::black));
-            painter.drawEllipse(xx - emptyCircleSize / 2, yy - emptyCircleSize / 2, emptyCircleSize, emptyCircleSize);
+            painter.drawEllipse(pos.x() - emptyCircleSize / 2, pos.y() - emptyCircleSize / 2, emptyCircleSize, emptyCircleSize);
 
             int manIndex = 8 * c + i;
             if (gameTable[manIndex] == 1 || gameTable[manIndex] == 2)
@@ -120,45 +127,50 @@ void TTTWidget::paintEvent(QPaintEvent* e)
                     painter.setBrush(whiteManBrush);
                 }
 
-                painter.drawEllipse(xx - manSize / 2, yy - manSize / 2, manSize, manSize);
+                painter.drawEllipse(pos.x() - manSize / 2, pos.y() - manSize / 2, manSize, manSize);
             }
         }
     }
 
-    for (int x = 0; x < 3; ++x) {
-        for (int y = 0; y < 3; ++y) {
-            int i = y*3 + x;
-            if (m_State[i] == 1) {
-                //X
-                painter.setPen(Xpen);
-                painter.drawLine(x*bw, y*bh,
-                                 (x+1)*bw, (y+1)*bh);
-                painter.drawLine(x*bw, (y+1)*bh,
-                                 (x+1)*bw, y*bh);
-            }
-            if (m_State[i] == 2) {
-                //O
-                painter.setPen(Open);
-                painter.drawEllipse(x*bw,y*bh,bw,bh);
-            }
-        }
+    if (this->selectedMan > -1)
+    {
+        int c = this->selectedMan / 8;
+        int i = this->selectedMan - 8 * c;
+        QVector2D pos = screenPosition(c, i, size);
+
+        painter.setPen(QPen(Qt::green, 2));
+        painter.setBrush(QBrush(Qt::transparent));
+        painter.drawRect(pos.x() - 1.1f * manSize / 2, pos.y() - 1.1f * manSize / 2, 1.1f * manSize, 1.1f * manSize);
     }
 }
 
 void TTTWidget::mousePressEvent(QMouseEvent* e)
 {
-    if (!m_bCPlayer) return;
+    //if (!m_bCPlayer) return;
 
-    int bw = this->width() / 3;
-    int bh = this->height() / 3;
+    int w = this->width();
+    int h = this->height();
+
+    int size = w < h ? w : h;
+    float manSize = manRelSize * size;
 
     int x = e->x();
     int y = e->y();
+    QVector2D clickPos = QVector2D(x, y);
 
-    int bx = x / bw;
-    int by = y / bh;
+    for (int c = 0; c < 3; c++)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            QVector2D pos = screenPosition(c, i, size);
+            if ((pos - clickPos).length() < manSize)
+            {
+                selectedMan = 8 * c + i;
+            }
 
-    int i = by * 3 + bx;
-    if (m_State[i] == 0)
-        emit signalStep(bx, by);
+        }
+    }
+
+    this->update();
+    //emit signalStep(bx, by);
 }
