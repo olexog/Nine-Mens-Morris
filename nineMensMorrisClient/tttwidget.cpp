@@ -1,6 +1,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include "tttwidget.h"
+#include "game.h"
 
 TTTWidget::TTTWidget(QWidget*, const char*)
 {
@@ -130,8 +131,8 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
     int size = w < h ? w : h;
     float manSize = manRelSize * size;
 
-    int x = e->x();
-    int y = e->y();
+    int x = e->position().x();
+    int y = e->position().y();
     QVector2D clickPos = QVector2D(x, y);
 
     int selection = -1;
@@ -156,6 +157,42 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             {
                 emit signalSendNewState(this->game);
             }
+        }
+
+        if ((this->game.gameState == Game::WhiteRemoves && this->game.manColor == Game::White) ||
+            (this->game.gameState == Game::BlackRemoves && this->game.manColor == Game::Black))
+        {
+            if (this->game.removeMan(selection))
+            {
+                emit signalSendNewState(this->game);
+            }
+        }
+
+        if ((this->game.gameState == Game::GameState::WhiteMoves && this->game.manColor == Game::ManColor::White) ||
+            (this->game.gameState == Game::GameState::BlackMoves && this->game.manColor == Game::ManColor::Black))
+        {
+            // destination is selected
+            if (this->selectedMan > -1)
+            {
+                // clear selection
+                if (this->selectedMan == selection)
+                {
+                    this->selectedMan = -1;
+                }
+                // move man
+                else if (this->game.moveMan(this->selectedMan, selection))
+                {
+                    emit signalSendNewState(this->game);
+                    this->selectedMan = -1;
+                }
+            }
+            // select source position
+            else
+            {
+                if (this->game.table[selection] == (int)this->game.manColor)
+                    this->selectedMan = selection;
+            }
+
         }
     }
 
