@@ -79,6 +79,7 @@ void NetHandler::slotDisconnected()
 void NetHandler::slotReadyRead()
 {
     QByteArray buf = m_pSocket->read(24 + 2);
+    m_pSocket->readAll();
 
     QString filename = "/home/olexo/Desktop/log.txt";
     QFile file(filename);

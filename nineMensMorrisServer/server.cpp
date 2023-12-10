@@ -141,25 +141,27 @@ void Server::SendState()
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
-        stream << "SERVER:writing ";
+        stream << "SERVER:writing to socket 1: buf:";
         for (int i = 0; i < 26; ++i)
         {
             stream << (int)buf[i];
         }
         stream << "\n";
     }
+    file.close();
 
     m_pSocket2->write(buf2);
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
-        stream << "SERVER:writing ";
+        stream << "SERVER:writing to socket 2: buf:";
         for (int i = 0; i < 26; ++i)
         {
             stream << (int)buf2[i];
         }
         stream << "\n";
     }
+    file.close();
 }
 
 void Server::ParsePkg(int pl, const QByteArray& pkg)
