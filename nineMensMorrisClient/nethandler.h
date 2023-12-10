@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QtNetwork>
+#include "game.h"
 
 class NetHandler : public QObject
 {
@@ -17,14 +18,14 @@ public:
 
 signals:
     void signalConnectionStatus(int status);
-    void signalState(bool cplayer, unsigned char* state);
+    void signalState(int state, int manColor, unsigned char* table);
     void signalEnd(int end);
 
 public slots:
     void slotReadyRead();
     void slotDisconnected();
 
-    void slotStep(int x, int y);
+    void slotStep(Game newSituation);
 
 protected:
     QTcpSocket* m_pSocket;

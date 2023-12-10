@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QVector2D>
+#include "game.h"
 
 class TTTWidget : public QWidget
 {
@@ -12,13 +13,14 @@ public:
     TTTWidget(QWidget* parent = 0, const char* name = 0);
 
 signals:
-    void signalStep(int x, int y);
+    void signalStep(Game newSituation);
 
 public slots:
     void slotInit();
-    void slotState(bool cplayer, unsigned char* state);
+    void slotState(int state, int manColor, unsigned char* table);
 
 protected:
+    Game game;
     unsigned char m_State[9];
     unsigned char gameTable[24];
     char selectedMan = -1;

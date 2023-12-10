@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "nethandler.h"
+#include "game.h"
 #include <QMessageBox>
 #include <QInputDialog>
 
@@ -18,13 +19,19 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(slotEnd(int)));
 
     connect(m_pNetHandler,
-            SIGNAL(signalState(bool, unsigned char*)),
+            SIGNAL(signalState(int, int, unsigned char*)),
             ui->tttwidget,
-            SLOT(slotState(bool, unsigned char*)));
+            SLOT(slotState(int, int, unsigned char*)));
     connect(ui->tttwidget,
-            SIGNAL(signalStep(int, int)),
+            SIGNAL(signalStep(Game)),
             m_pNetHandler,
-            SLOT(slotStep(int, int)));
+            SLOT(slotStep(Game)));
+
+    if (QCoreApplication::arguments().count() > 1)
+    {
+        QString arg = QCoreApplication::arguments().at(1);
+        m_pNetHandler->Connect(arg);
+    }
 }
 
 MainWindow::~MainWindow()

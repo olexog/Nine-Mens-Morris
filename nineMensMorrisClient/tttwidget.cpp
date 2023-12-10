@@ -9,19 +9,7 @@ TTTWidget::TTTWidget(QWidget*, const char*)
 
 void TTTWidget::Init()
 {
-    for (int i = 0; i < 9; ++i) {
-        m_State[i] = 0;
-    }
 
-    for (int i = 0; i < 24; ++i) {
-        gameTable[i] = 0;
-    }
-
-    gameTable[0] = 1;
-    gameTable[4] = 2;
-    gameTable[20] = 2;
-
-    m_bCPlayer = false;
 }
 
 void TTTWidget::slotInit()
@@ -30,13 +18,13 @@ void TTTWidget::slotInit()
     update();
 }
 
-void TTTWidget::slotState(bool cplayer, unsigned char* state)
+void TTTWidget::slotState(int state, int manColor, unsigned char* gameTable)
 {
-    for (int i = 0; i < 9; ++i) {
-        m_State[i] = state[i];
+    for (int i = 0; i < 24; ++i) {
+        this->game.table[i] = gameTable[i];
     }
-
-    m_bCPlayer = cplayer;
+    this->game.gameState = static_cast<Game::GameState>(state);
+    this->game.manColor = static_cast<Game::ManColor>(manColor);
     update();
 }
 
@@ -114,9 +102,9 @@ void TTTWidget::paintEvent(QPaintEvent* e)
             painter.drawEllipse(pos.x() - emptyCircleSize / 2, pos.y() - emptyCircleSize / 2, emptyCircleSize, emptyCircleSize);
 
             int manIndex = 8 * c + i;
-            if (gameTable[manIndex] == 1 || gameTable[manIndex] == 2)
+            if (this->game.table[manIndex] == 1 || this->game.table[manIndex] == 2)
             {
-                if (gameTable[manIndex] == 1)
+                if (this->game.table[manIndex] == 1)
                 {
                     painter.setPen(blackManPen);
                     painter.setBrush(blackManBrush);
@@ -158,6 +146,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
     int y = e->y();
     QVector2D clickPos = QVector2D(x, y);
 
+    int selection = -1;
     for (int c = 0; c < 3; c++)
     {
         for (int i = 0; i < 8; i++)
@@ -165,12 +154,22 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             QVector2D pos = screenPosition(c, i, size);
             if ((pos - clickPos).length() < manSize)
             {
-                selectedMan = 8 * c + i;
+                selection = 8 * c + i;
             }
 
         }
     }
 
+    if (selection > -1 && this->game.gameState == Game::GameState::WhitePlaces && this->game.manColor == Game::ManColor::White)
+    {
+        this->game.placeMan(selection);
+        emit signalStep(this->game);
+    }
+    else if (selection > -1 && this->game.gameState == Game::GameState::BlackPlaces && this->game.manColor == Game::ManColor::Black)
+    {
+        this->game.placeMan(selection);
+        emit signalStep(this->game);
+    }
+
     this->update();
-    //emit signalStep(bx, by);
 }

@@ -3,6 +3,10 @@
 
 #include <QObject>
 #include <QtNetwork>
+#include "game.h"
+
+#include <QFile>
+#include <QTextStream>
 
 class Server : public QObject
 {
@@ -18,6 +22,7 @@ protected:
     void SendState();
     void ParsePkg(int pl, const QByteArray& pkg);
     void CheckEnd();
+    void StartGame();
 
 signals:
 
@@ -35,6 +40,8 @@ protected:
     unsigned char m_State[9];
     int m_CPlayer;
     int m_End;
+    Game game;
+
 };
 
 #endif // SERVER_H

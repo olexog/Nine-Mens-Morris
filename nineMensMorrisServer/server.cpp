@@ -64,7 +64,16 @@ void Server::slotIncomingConn()
 
     // játék kezdése
     if ((m_pSocket1 != NULL) && (m_pSocket2 != NULL))
+    {
         Init();
+        this->StartGame();
+    }
+}
+
+void Server::StartGame()
+{
+    this->game = Game();
+    this->SendState();
 }
 
 // A kapcsolat lezarasanak erzekelese.
@@ -87,16 +96,16 @@ void Server::slotDisconnected()
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead1()
 {
-    QByteArray buf = m_pSocket1->read(2);
-    if (buf.length() == 2)
+    QByteArray buf = m_pSocket1->read(26);
+    if (buf.length() == 26)
         ParsePkg(1, buf);
 }
 
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead2()
 {
-    QByteArray buf = m_pSocket2->read(2);
-    if (buf.length() == 2)
+    QByteArray buf = m_pSocket2->read(26);
+    if (buf.length() == 26)
         ParsePkg(2, buf);
 }
 
@@ -112,28 +121,62 @@ void Server::Init()
 
 void Server::SendState()
 {
-    QByteArray buf(11,0);
-    buf[0] = (quint8)m_End;
-    for (int i = 0; i < 9; ++i) {
-        buf[i + 2] = m_State[i];
+    QByteArray buf(2+24,0);
+    buf[0] = (quint8)this->game.gameState;
+    buf[1] = 1; // black
+    for (int i = 0; i < 24; ++i) {
+        buf[i + 2] = this->game.gameTable[i];
     }
 
-    buf[1] = (quint8)((m_CPlayer == 1)? 1 : 0);
+    QByteArray buf2(2+24,0);
+    buf2[0] = (quint8)this->game.gameState;
+    buf2[1] = 2; // white
+    for (int i = 0; i < 24; ++i) {
+        buf2[i + 2] = this->game.gameTable[i];
+    }
+
     m_pSocket1->write(buf);
 
-    buf[1] = (quint8)((m_CPlayer == 2)? 1 : 0);
-    m_pSocket2->write(buf);
+    QString filename = "/home/olexo/Desktop/log.txt";
+    QFile file(filename);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
+        QTextStream stream(&file);
+        stream << "SERVER:writing ";
+        for (int i = 0; i < 26; ++i)
+        {
+            stream << (int)buf[i];
+        }
+        stream << "\n";
+    }
 
+    m_pSocket2->write(buf2);
+
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
+        QTextStream stream(&file);
+        stream << "SERVER:writing ";
+        for (int i = 0; i < 26; ++i)
+        {
+            stream << (int)buf2[i];
+        }
+        stream << "\n";
+    }
 }
 
 void Server::ParsePkg(int pl, const QByteArray& pkg)
 {
-    if (pl != m_CPlayer) return;
+    //if (pl != m_CPlayer) return;
 
-    int x = pkg[0];
-    int y = pkg[1];
+    this->game.gameState = static_cast<Game::GameState>(pkg[0]);
 
-    int i = y*3+x;
+    for(int i = 0; i < 24; i++)
+    {
+        this->game.gameTable[i] = pkg[2 + i];
+    }
+
+    //CheckEnd();
+    SendState();
+
+    /*int i = y*3+x;
     if (m_State[i] == 0) {
         m_State[i] = pl;
         m_CPlayer = (m_CPlayer % 2) + 1;
@@ -146,7 +189,7 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
             QTimer::singleShot(100, this,
                                SLOT(slotDisconnected()));
         }
-    }
+    }*/
 
 }
 
