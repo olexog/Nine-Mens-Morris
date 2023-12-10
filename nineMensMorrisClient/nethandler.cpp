@@ -78,7 +78,7 @@ void NetHandler::slotDisconnected()
 // Amikor egy csomag erkezik, akkor a szignal hatasara ez a slot hivodik meg.
 void NetHandler::slotReadyRead()
 {
-    QByteArray buf = m_pSocket->read(24 + 2);
+    QByteArray buf = m_pSocket->read(28);
     m_pSocket->readAll();
 
     QString filename = "/home/olexo/Desktop/log.txt";
@@ -86,44 +86,48 @@ void NetHandler::slotReadyRead()
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "CLIENT:reading ";
-        for (int i = 0; i < 26; ++i)
+        for (int i = 0; i < 28; ++i)
         {
             stream << (int)buf[i];
         }
         stream << "\n";
     }
 
-    int state = buf[0];
-    int manColor = buf[1];
+    Game receivedSituation = Game();
 
-    unsigned char gameTable[24];
+    receivedSituation.gameState = static_cast<Game::GameState>(buf[0]);
+    receivedSituation.manColor = static_cast<Game::ManColor>(buf[1]);
+    receivedSituation.whiteMenToBePlaced = (int)buf[2];
+    receivedSituation.blackMenToBePlaced = (int)buf[3];
 
-    for (int i = 0; i < 24; i++)
+    for (int i = 0; i < 24; ++i)
     {
-        gameTable[i] = buf[i + 2];
+        receivedSituation.table[i] = buf[i + 4];
     }
 
-    emit signalState(state, manColor, gameTable);
+    emit signalStateReceived(receivedSituation);
 
     //emit signalEnd(end);
 }
 
 // A lepes elkuldese a szervernek.
-void NetHandler::slotStep(Game newSituation)
+void NetHandler::slotSendNewState(Game newSituation)
 {
     // Biztonsagi ellenorzes. Ha nem letezne a kliens socket valamilyen
     // okbol, akkor visszater a fuggveny.
     if (!m_pSocket) return;
 
     // Osszeallitjuk a protokoll szerinti uzenetet.
-    QByteArray buf(26,0);
+    QByteArray buf(28,0);
 
     buf[0] = (quint8)newSituation.gameState;
     buf[1] = (quint8)newSituation.manColor;
+    buf[2] = (quint8)newSituation.whiteMenToBePlaced;
+    buf[3] = (quint8)newSituation.blackMenToBePlaced;
 
     for (int i = 0; i < 24; i++)
     {
-        buf[i + 2] = (quint8)newSituation.table[i];
+        buf[i + 4] = (quint8)newSituation.table[i];
     }
 
     // A kliens socketen keresztul elkuldjuk a masik programnak.

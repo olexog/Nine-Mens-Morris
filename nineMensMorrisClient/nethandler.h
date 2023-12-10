@@ -18,14 +18,14 @@ public:
 
 signals:
     void signalConnectionStatus(int status);
-    void signalState(int state, int manColor, unsigned char* table);
+    void signalStateReceived(Game receivedSituation);
     void signalEnd(int end);
 
 public slots:
     void slotReadyRead();
     void slotDisconnected();
 
-    void slotStep(Game newSituation);
+    void slotSendNewState(Game newSituation);
 
 protected:
     QTcpSocket* m_pSocket;

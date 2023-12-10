@@ -13,11 +13,11 @@ public:
     TTTWidget(QWidget* parent = 0, const char* name = 0);
 
 signals:
-    void signalStep(Game newSituation);
+    void signalSendNewState(Game newSituation);
 
 public slots:
     void slotInit();
-    void slotState(int state, int manColor, unsigned char* table);
+    void slotStateReceived(Game receivedSituation);
 
 protected:
     Game game;

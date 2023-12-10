@@ -18,13 +18,9 @@ void TTTWidget::slotInit()
     update();
 }
 
-void TTTWidget::slotState(int state, int manColor, unsigned char* gameTable)
+void TTTWidget::slotStateReceived(Game receivedSituation)
 {
-    for (int i = 0; i < 24; ++i) {
-        this->game.table[i] = gameTable[i];
-    }
-    this->game.gameState = static_cast<Game::GameState>(state);
-    this->game.manColor = static_cast<Game::ManColor>(manColor);
+    this->game = receivedSituation;
     update();
 }
 
@@ -50,8 +46,6 @@ void TTTWidget::paintEvent(QPaintEvent* e)
 {
     int w = this->width();
     int h = this->height();
-    int bw = w / 3;
-    int bh = h / 3;
 
     int size = w < h ? w : h;
     float borderMargin = 1.0f/16.0f;
@@ -73,12 +67,6 @@ void TTTWidget::paintEvent(QPaintEvent* e)
     painter.drawLine(size - size * borderMargin, size / 2, size - size * borderMargin - 2 * size * rectSpace, size / 2);
     painter.drawLine(size / 2, size * borderMargin, size / 2, size * borderMargin + 2 * size * rectSpace);
     painter.drawLine(size / 2, size - size * borderMargin, size / 2, size - size * borderMargin - 2 * size * rectSpace);
-
-    for (int i = 1; i < 3; ++i) {
-    }
-
-    QPen Xpen(Qt::blue, 2);
-    QPen Open(Qt::red, 2);
 
     QPen blackPen(Qt::black, 2);
 
@@ -156,19 +144,19 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             {
                 selection = 8 * c + i;
             }
-
         }
     }
 
-    if (selection > -1 && this->game.gameState == Game::GameState::WhitePlaces && this->game.manColor == Game::ManColor::White)
+    if (selection > -1)
     {
-        this->game.placeMan(selection);
-        emit signalStep(this->game);
-    }
-    else if (selection > -1 && this->game.gameState == Game::GameState::BlackPlaces && this->game.manColor == Game::ManColor::Black)
-    {
-        this->game.placeMan(selection);
-        emit signalStep(this->game);
+        if ((this->game.gameState == Game::GameState::WhitePlaces && this->game.manColor == Game::ManColor::White) ||
+            (this->game.gameState == Game::GameState::BlackPlaces && this->game.manColor == Game::ManColor::Black))
+        {
+            if (this->game.placeMan(selection))
+            {
+                emit signalSendNewState(this->game);
+            }
+        }
     }
 
     this->update();

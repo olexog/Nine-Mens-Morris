@@ -6,11 +6,13 @@ class Game
 public:
     Game();
     unsigned char table[24];
+    int whiteMenToBePlaced;
+    int blackMenToBePlaced;
     enum ManColor {Black = 1, White = 2 };
     ManColor manColor;
     enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6, Finished = 7};
     GameState gameState;
-    void placeMan(int position);
+    bool placeMan(int position);
 };
 
 #endif // GAME_H

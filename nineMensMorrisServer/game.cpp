@@ -6,4 +6,6 @@ Game::Game() {
     {
         this->gameTable[i] = 0;
     }
+    this->whiteMenToBePlaced = 9;
+    this->blackMenToBePlaced = 9;
 }

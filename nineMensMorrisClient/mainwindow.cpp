@@ -19,13 +19,13 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(slotEnd(int)));
 
     connect(m_pNetHandler,
-            SIGNAL(signalState(int, int, unsigned char*)),
+            SIGNAL(signalStateReceived(Game)),
             ui->tttwidget,
-            SLOT(slotState(int, int, unsigned char*)));
+            SLOT(slotStateReceived(Game)));
     connect(ui->tttwidget,
-            SIGNAL(signalStep(Game)),
+            SIGNAL(signalSendNewState(Game)),
             m_pNetHandler,
-            SLOT(slotStep(Game)));
+            SLOT(slotSendNewState(Game)));
 
     if (QCoreApplication::arguments().count() > 1)
     {

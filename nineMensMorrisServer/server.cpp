@@ -96,16 +96,16 @@ void Server::slotDisconnected()
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead1()
 {
-    QByteArray buf = m_pSocket1->read(26);
-    if (buf.length() == 26)
+    QByteArray buf = m_pSocket1->read(28);
+    if (buf.length() == 28)
         ParsePkg(1, buf);
 }
 
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead2()
 {
-    QByteArray buf = m_pSocket2->read(26);
-    if (buf.length() == 26)
+    QByteArray buf = m_pSocket2->read(28);
+    if (buf.length() == 28)
         ParsePkg(2, buf);
 }
 
@@ -121,18 +121,22 @@ void Server::Init()
 
 void Server::SendState()
 {
-    QByteArray buf(2+24,0);
+    QByteArray buf(28,0);
     buf[0] = (quint8)this->game.gameState;
     buf[1] = 1; // black
+    buf[2] = (quint8)this->game.whiteMenToBePlaced;
+    buf[3] = (quint8)this->game.blackMenToBePlaced;
     for (int i = 0; i < 24; ++i) {
-        buf[i + 2] = this->game.gameTable[i];
+        buf[i + 4] = this->game.gameTable[i];
     }
 
-    QByteArray buf2(2+24,0);
+    QByteArray buf2(28,0);
     buf2[0] = (quint8)this->game.gameState;
     buf2[1] = 2; // white
+    buf2[2] = (quint8)this->game.whiteMenToBePlaced;
+    buf2[3] = (quint8)this->game.blackMenToBePlaced;
     for (int i = 0; i < 24; ++i) {
-        buf2[i + 2] = this->game.gameTable[i];
+        buf2[i + 4] = this->game.gameTable[i];
     }
 
     m_pSocket1->write(buf);
@@ -142,7 +146,7 @@ void Server::SendState()
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "SERVER:writing to socket 1: buf:";
-        for (int i = 0; i < 26; ++i)
+        for (int i = 0; i < 28; ++i)
         {
             stream << (int)buf[i];
         }
@@ -155,7 +159,7 @@ void Server::SendState()
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "SERVER:writing to socket 2: buf:";
-        for (int i = 0; i < 26; ++i)
+        for (int i = 0; i < 28; ++i)
         {
             stream << (int)buf2[i];
         }
@@ -170,9 +174,12 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
 
     this->game.gameState = static_cast<Game::GameState>(pkg[0]);
 
+    this->game.whiteMenToBePlaced = (int)pkg[2];
+    this->game.blackMenToBePlaced = (int)pkg[3];
+
     for(int i = 0; i < 24; i++)
     {
-        this->game.gameTable[i] = pkg[2 + i];
+        this->game.gameTable[i] = pkg[4 + i];
     }
 
     //CheckEnd();
