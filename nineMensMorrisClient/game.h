@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <QString>
+
 class Game
 {
 public:
@@ -17,6 +19,8 @@ public:
     bool moveMan(int fromPos, int toPos);
     bool removeMan(int pos);
     ManColor winner();
+    QString getMessage();
+    bool canJump();
 private:
     bool closedMillOnPosition(int pos);
     int numberOfFreeMan(ManColor color);
@@ -29,6 +33,7 @@ private:
                                                       {1, 9, 17}, {3, 11, 19}, {5, 13, 21}, {7, 15, 23} };
     static const int MILLS_COUNT = 16;
     static const int POSITION_COUNT = 24;
+    QString message;
 };
 
 #endif // GAME_H

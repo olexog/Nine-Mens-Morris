@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    QString filename = "/home/olexo/Desktop/log.txt";
+    QString filename = "../log.txt";
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {

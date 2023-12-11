@@ -14,6 +14,7 @@ public:
 
 signals:
     void signalSendNewState(Game newSituation);
+    void signalUpdateLabels(QString colorInfo, QString direction, QString gameInfo);
 
 public slots:
     void slotInit();
@@ -38,7 +39,7 @@ protected:
     QVector2D screenPosition(int c, int i, int size);
     void gameStateChanged();
     void checkForWin();
-
+    void updateLabels();
 };
 
 #endif // TTTWIDGET_H

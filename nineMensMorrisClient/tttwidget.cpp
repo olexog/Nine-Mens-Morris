@@ -7,6 +7,7 @@
 TTTWidget::TTTWidget(QWidget*, const char*)
 {
     Init();
+    updateLabels();
 }
 
 void TTTWidget::Init()
@@ -31,6 +32,55 @@ void TTTWidget::slotNewGame()
 {
     this->game.gameState = Game::ReadyForNewGame;
     gameStateChanged();
+}
+
+void TTTWidget::updateLabels()
+{
+    QString colorInfo = game.manColor == Game::White ? "WHITE" : "BLACK";
+
+    QString directions = "";
+
+    if (game.gameState == Game::WhitePlaces || game.gameState == Game::BlackPlaces)
+    {
+        if ((game.gameState == Game::WhitePlaces && game.manColor == Game::White) ||
+            (game.gameState == Game::BlackPlaces && game.manColor == Game::Black))
+        {
+            directions = "Place a piece on an empty slot!";
+        }
+        else
+        {
+            directions = "Waiting for other player to place a piece...";
+        }
+    }
+    else if (game.gameState == Game::WhiteMoves || game.gameState == Game::BlackMoves)
+    {
+        if ((game.gameState == Game::WhiteMoves && game.manColor == Game::White) ||
+            (game.gameState == Game::BlackMoves && game.manColor == Game::Black))
+        {
+            if (game.canJump())
+                directions = "Move a piece to any emtpy slot. You are free to jump now.";
+            else
+                directions = "Move a piece to any adjacent slot.";
+        }
+        else
+        {
+            directions = "Waiting for other player to move a piece...";
+        }
+    }
+    else if (game.gameState == Game::WhiteRemoves || game.gameState == Game::BlackRemoves)
+    {
+        if ((game.gameState == Game::WhiteRemoves && game.manColor == Game::White) ||
+            (game.gameState == Game::BlackRemoves && game.manColor == Game::Black))
+        {
+            directions = "Remove a piece from the opponent's pieces! Free men first.";
+        }
+        else
+        {
+            directions = "Waiting for other player to remove a piece...";
+        }
+    }
+
+    emit signalUpdateLabels(colorInfo, directions, game.getMessage());
 }
 
 QVector2D TTTWidget::screenPosition(int c, int i, int size)
@@ -203,6 +253,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
     }
 
     this->update();
+    updateLabels();
 }
 
 void TTTWidget::checkForWin()
@@ -223,4 +274,5 @@ void TTTWidget::checkForWin()
 void TTTWidget::gameStateChanged()
 {
     emit signalSendNewState(this->game);
+    updateLabels();
 }

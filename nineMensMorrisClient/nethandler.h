@@ -29,6 +29,8 @@ public slots:
 
 protected:
     QTcpSocket* m_pSocket;
+    const int HEADER_LENGTH = 4;
+    const int TABLE_SIZE = 24;
 };
 
 #endif // NETHANDLER_H

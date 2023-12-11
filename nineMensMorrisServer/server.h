@@ -45,8 +45,7 @@ protected:
     Game game;
     bool player1WaitingForStart;
     bool player2WaitingForStart;
-    const int SEND_HEADER_LENGTH = 5;
-    const int RECEIVE_HEADER_LENGTH = 4;
+    const int HEADER_LENGTH = 4;
     const int TABLE_SIZE = 24;
 
 };

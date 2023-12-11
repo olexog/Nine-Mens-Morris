@@ -12,17 +12,24 @@ Game::Game() {
     this->blackMenToBePlaced = 9;
 }
 
+QString Game::getMessage()
+{
+    return this->message;
+}
+
 bool Game::placeMan(int position){
     // game state is not applicable for placing
     if (this->gameState != GameState::WhitePlaces && this->gameState != GameState::BlackPlaces)
     {
         qDebug() << "Game state is invalid for placing!" << this->gameState;
+        message = "Game state is invalid for placing!";
         return false;
     }
 
     if (position < 0 || (position > 23))
     {
         qDebug() << "Position is invalid!";
+        message = "Position is invalid!";
         return false;
     }
 
@@ -30,6 +37,7 @@ bool Game::placeMan(int position){
     if (this->table[position] != 0)
     {
         qDebug() << "Position is not empty to place!";
+        message = "Position is not empty to place!";
         return false;
     }
 
@@ -119,18 +127,21 @@ bool Game::moveMan(int fromPos, int toPos)
     if (this->table[fromPos] != (int)this->manColor)
     {
         qDebug() << "Wrong man color selected!";
+        message = "Wrong man color selected!";
         return false;
     }
 
     if (this->table[toPos] != (int)ManColor::Empty)
     {
         qDebug() << "Destination position is not empty!";
+        message = "Destination position is not empty!";
         return false;
     }
 
     if (manCount(this->manColor) > 3 && !isNeighbour(fromPos, toPos))
     {
         qDebug() << "Moving only to adjacent cells!";
+        message = "Moving only to adjacent cells!";
         return false;
     }
 
@@ -188,12 +199,14 @@ bool Game::removeMan(int pos)
     if (this->table[pos] != (int)opponentColor)
     {
         qDebug() << "You have to remove from the opponent's pieces";
+        message = "You have to remove from the opponent's pieces!";
         return false;
     }
 
     if (closedMillOnPosition(pos) && numberOfFreeMan(opponentColor) != 0)
     {
         qDebug() << "Cannot remove piece from closed mill if there are free men.";
+        message = "Cannot remove piece from closed mill if there are free men.";
         return false;
     }
 
@@ -337,4 +350,9 @@ Game::ManColor Game::winner()
         return White;
 
     return Empty;
+}
+
+bool Game::canJump()
+{
+    return manCount(manColor) == 3;
 }

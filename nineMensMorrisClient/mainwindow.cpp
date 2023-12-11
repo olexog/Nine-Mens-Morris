@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButtonStartNewGame, SIGNAL(clicked()),
             ui->nmmwidget, SLOT(slotNewGame()));
 
+    connect(ui->nmmwidget, SIGNAL(signalUpdateLabels(QString,QString,QString)),
+            this, SLOT(slotUpdateLabels(QString,QString,QString)));
+
     if (QCoreApplication::arguments().count() > 1)
     {
         QString arg = QCoreApplication::arguments().at(1);
@@ -39,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::slotUpdateLabels(QString colorInfo, QString direction, QString gameInfo)
+{
+    ui->labelColorInfo->setText(colorInfo);
+    ui->labelDirections->setText(direction);
+    ui->labelGameInfo->setText(gameInfo);
 }
 
 // A kapcsolat allapotanak kijelzese es a menuelemek allitasa.

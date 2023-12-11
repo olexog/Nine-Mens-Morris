@@ -10,7 +10,7 @@ Game::Game() {
     this->whiteMenToBePlaced = 9;
     this->blackMenToBePlaced = 9;
 
-    for (int i = 0; i < 8; i++)
+    /*for (int i = 0; i < 8; i++)
     {
         this->gameTable[i] = 1;
     }
@@ -21,5 +21,5 @@ Game::Game() {
     }
 
     this->whiteMenToBePlaced = 1;
-    this->blackMenToBePlaced = 1;
+    this->blackMenToBePlaced = 1;*/
 }

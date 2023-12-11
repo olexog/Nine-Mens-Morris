@@ -78,15 +78,14 @@ void NetHandler::slotDisconnected()
 // Amikor egy csomag erkezik, akkor a szignal hatasara ez a slot hivodik meg.
 void NetHandler::slotReadyRead()
 {
-    QByteArray buf = m_pSocket->read(29);
-    m_pSocket->readAll();
+    QByteArray buf = m_pSocket->readAll().last(HEADER_LENGTH + TABLE_SIZE);
 
-    QString filename = "/home/olexo/Desktop/log.txt";
+    QString filename = "../log.txt";
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "CLIENT:reading ";
-        for (int i = 0; i < 29; ++i)
+        for (int i = 0; i < HEADER_LENGTH + TABLE_SIZE; ++i)
         {
             stream << (int)buf[i];
         }
@@ -99,11 +98,10 @@ void NetHandler::slotReadyRead()
     receivedSituation.manColor = static_cast<Game::ManColor>(buf[1]);
     receivedSituation.whiteMenToBePlaced = (int)buf[2];
     receivedSituation.blackMenToBePlaced = (int)buf[3];
-    bool opponentConnected = (bool)buf[4];
 
-    for (int i = 0; i < 24; ++i)
+    for (int i = 0; i < TABLE_SIZE; ++i)
     {
-        receivedSituation.table[i] = buf[i + 5];
+        receivedSituation.table[i] = buf[i + HEADER_LENGTH];
     }
 
     emit signalStateReceived(receivedSituation);
@@ -119,16 +117,16 @@ void NetHandler::slotSendNewState(Game newSituation)
     if (!m_pSocket) return;
 
     // Osszeallitjuk a protokoll szerinti uzenetet.
-    QByteArray buf(28,0);
+    QByteArray buf(HEADER_LENGTH + TABLE_SIZE,0);
 
     buf[0] = (quint8)newSituation.gameState;
     buf[1] = (quint8)newSituation.manColor;
     buf[2] = (quint8)newSituation.whiteMenToBePlaced;
     buf[3] = (quint8)newSituation.blackMenToBePlaced;
 
-    for (int i = 0; i < 24; i++)
+    for (int i = 0; i < TABLE_SIZE; i++)
     {
-        buf[i + 4] = (quint8)newSituation.table[i];
+        buf[i + HEADER_LENGTH] = (quint8)newSituation.table[i];
     }
 
     // A kliens socketen keresztul elkuldjuk a masik programnak.
