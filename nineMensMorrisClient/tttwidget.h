@@ -18,6 +18,7 @@ signals:
 public slots:
     void slotInit();
     void slotStateReceived(Game receivedSituation);
+    void slotNewGame();
 
 protected:
     Game game;

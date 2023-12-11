@@ -1,4 +1,5 @@
 #include "server.h"
+#include "game.h"
 
 Server::Server(QObject *parent) :
         QObject(parent)
@@ -7,8 +8,8 @@ Server::Server(QObject *parent) :
     m_pSocket1 = NULL;
     m_pSocket2 = NULL;
 
-    m_CPlayer = 0;
-    m_End = 0;
+    player1WaitingForStart = false;
+    player2WaitingForStart = false;
 }
 
 Server::~Server()
@@ -55,19 +56,26 @@ void Server::slotIncomingConn()
         m_pSocket1 = pSocket;
         connect(m_pSocket1, SIGNAL(readyRead()),
                 this, SLOT(slotReadyRead1()));
+        connect(m_pSocket1, SIGNAL(disconnected()),
+                this, SLOT(slotSocket1Disconnected()));
+        SendState();
+
     }
     else if (m_pSocket2 == NULL) {
         m_pSocket2 = pSocket;
         connect(m_pSocket2, SIGNAL(readyRead()),
                 this, SLOT(slotReadyRead2()));
+        connect(m_pSocket2, SIGNAL(disconnected()),
+                this, SLOT(slotSocket2Disconnected()));
+        SendState();
+
     }
 
     // játék kezdése
-    if ((m_pSocket1 != NULL) && (m_pSocket2 != NULL))
+    /*if ((m_pSocket1 != NULL) && (m_pSocket2 != NULL))
     {
-        Init();
         this->StartGame();
-    }
+    }*/
 }
 
 void Server::StartGame()
@@ -79,18 +87,38 @@ void Server::StartGame()
 // A kapcsolat lezarasanak erzekelese.
 void Server::slotDisconnected()
 {
-    disconnect(this, SLOT(slotDisconnected()));
+    //disconnect(this, SLOT(slotDisconnected()));
 
     // Ha letezik meg kliens socket akkor lezarjuk.
-    if (m_pSocket1) {
+    /*if (!m_pSocket1) {
         m_pSocket1->deleteLater();
         m_pSocket1 = NULL;
     }
 
+    if (!m_pSocket2) {
+        m_pSocket2->deleteLater();
+        m_pSocket2 = NULL;
+    }*/
+}
+
+void Server::slotSocket1Disconnected()
+{
+    if (m_pSocket1) {
+        m_pSocket1->deleteLater();
+        m_pSocket1 = NULL;
+    }
+    player1WaitingForStart = false;
+    SendState();
+}
+
+void Server::slotSocket2Disconnected()
+{
     if (m_pSocket2) {
         m_pSocket2->deleteLater();
         m_pSocket2 = NULL;
     }
+    player2WaitingForStart = false;
+    SendState();
 }
 
 // Csomag erkezesenek lekezelese.
@@ -109,16 +137,6 @@ void Server::slotReadyRead2()
         ParsePkg(2, buf);
 }
 
-void Server::Init()
-{
-    srand(time(NULL));
-    m_CPlayer = rand() % 2 + 1;
-    m_End = 0;
-    for (int i = 0; i < 9; ++i)
-        m_State[i] = 0;
-    SendState();
-}
-
 void Server::SendState()
 {
     QString filename = "/home/olexo/Desktop/log.txt";
@@ -126,40 +144,47 @@ void Server::SendState()
 
     QByteArray buf(SEND_HEADER_LENGTH + TABLE_SIZE,0);
     buf[0] = (quint8)this->game.gameState;
-    buf[1] = 1; // black
+    buf[1] = (quint8)Game::Black;
     buf[2] = (quint8)this->game.whiteMenToBePlaced;
     buf[3] = (quint8)this->game.blackMenToBePlaced;
-    buf[4] = (quint8)true;
+    buf[4] = (quint8)(m_pSocket2 != NULL);
     for (int i = 0; i < TABLE_SIZE; ++i) {
         buf[i + SEND_HEADER_LENGTH] = this->game.gameTable[i];
     }
 
-    m_pSocket1->write(buf);
+    if (m_pSocket1)
+    {
+        m_pSocket1->write(buf);
 
-    if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
-        QTextStream stream(&file);
-        stream << "SERVER:writing to socket 1: buf:";
-        for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
-        {
-            stream << (int)buf[i];
+        if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            QTextStream stream(&file);
+            stream << "SERVER:writing to socket 1: buf:";
+            for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
+            {
+                stream << (int)buf[i];
+            }
+            stream << "\n";
         }
-        stream << "\n";
+        file.close();
     }
-    file.close();
 
-    buf[1] = 2; // white
+    buf[1] = (quint8)Game::White;
+    buf[4] = (quint8)(m_pSocket1 != NULL);
 
-    m_pSocket2->write(buf);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
-        QTextStream stream(&file);
-        stream << "SERVER:writing to socket 1: buf:";
-        for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
-        {
-            stream << (int)buf[i];
+    if (m_pSocket2)
+    {
+        m_pSocket2->write(buf);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            QTextStream stream(&file);
+            stream << "SERVER:writing to socket 2: buf:";
+            for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
+            {
+                stream << (int)buf[i];
+            }
+            stream << "\n";
         }
-        stream << "\n";
+        file.close();
     }
-    file.close();
 }
 
 void Server::ParsePkg(int pl, const QByteArray& pkg)
@@ -176,8 +201,19 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
         this->game.gameTable[i] = pkg[RECEIVE_HEADER_LENGTH + i];
     }
 
-    //CheckEnd();
-    SendState();
+    if (pl == 1)
+        player1WaitingForStart = this->game.gameState == Game::ReadyForNewGame;
+    else if (pl == 2)
+        player2WaitingForStart = this->game.gameState == Game::ReadyForNewGame;
+
+    if (player1WaitingForStart && player2WaitingForStart)
+    {
+        StartGame();
+    }
+    else
+    {
+        SendState();
+    }
 
     /*int i = y*3+x;
     if (m_State[i] == 0) {
@@ -194,55 +230,4 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
         }
     }*/
 
-}
-
-// A jatek vegenek ellenorzese.
-void Server::CheckEnd()
-{
-    unsigned char tmp;
-
-    // Ellenorizzuk, hogy osszejott-e valamelyik nyero kombinacio.
-    // Az atlok ellenorzese.
-    tmp = m_State[0];
-    if((tmp > 0) && (m_State[4] == tmp) && (m_State[8] == tmp))
-    {
-        m_End = tmp;
-        return;
-    }
-    tmp = m_State[2];
-    if((tmp > 0) && (m_State[4] == tmp) && (m_State[6] == tmp))
-    {
-        m_End = tmp;
-        return;
-    }
-    // Vizszintes es fuggoleges kombinaciok ellenorzese.
-    for(int i = 0; i < 3; i++)
-    {
-        tmp = m_State[i * 3];
-        if((tmp > 0) && (m_State[i * 3 + 1] == tmp) && (m_State[i * 3 + 2] == tmp))
-        {
-            m_End = tmp;
-            return;
-        }
-        tmp = m_State[i];
-        if((tmp > 0) && (m_State[3 + i] == tmp) && (m_State[6 + i] == tmp))
-        {
-            m_End = tmp;
-            return;
-        }
-    }
-
-    // Ha egyik nyero kombinacio sem jott ki, akkor ellenorizzuk van-e meg ures
-    // pozicio, mert kulonben dontetlen.
-    for(int i = 0; i < 9; i++)
-    {
-        if(m_State[i] == 0)
-        {
-            m_End = 0;
-            return;
-        }
-    }
-
-    m_End = 3;
-    return;
 }

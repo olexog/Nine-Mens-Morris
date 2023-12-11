@@ -18,7 +18,6 @@ public:
     void StartServer();
 
 protected:
-    void Init();
     void SendState();
     void ParsePkg(int pl, const QByteArray& pkg);
     void CheckEnd();
@@ -32,6 +31,9 @@ public slots:
     void slotReadyRead2();
     void slotDisconnected();
 
+    void slotSocket1Disconnected();
+    void slotSocket2Disconnected();
+
 protected:
     QTcpServer* m_pServSocket;
     QTcpSocket* m_pSocket1;
@@ -41,6 +43,8 @@ protected:
     int m_CPlayer;
     int m_End;
     Game game;
+    bool player1WaitingForStart;
+    bool player2WaitingForStart;
     const int SEND_HEADER_LENGTH = 5;
     const int RECEIVE_HEADER_LENGTH = 4;
     const int TABLE_SIZE = 24;

@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(signalSendNewState(Game)),
             m_pNetHandler,
             SLOT(slotSendNewState(Game)));
+    connect(ui->pushButtonStartNewGame, SIGNAL(clicked()),
+            ui->nmmwidget, SLOT(slotNewGame()));
 
     if (QCoreApplication::arguments().count() > 1)
     {
@@ -125,5 +127,11 @@ void MainWindow::on_pushButtonConnect_clicked()
 void MainWindow::on_pushButtonDisconnect_clicked()
 {
     disconnectFromServer();
+}
+
+
+void MainWindow::on_pushButtonStartNewGame_clicked()
+{
+
 }
 

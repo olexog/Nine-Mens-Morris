@@ -27,6 +27,12 @@ void TTTWidget::slotStateReceived(Game receivedSituation)
     checkForWin();
 }
 
+void TTTWidget::slotNewGame()
+{
+    this->game.gameState = Game::ReadyForNewGame;
+    gameStateChanged();
+}
+
 QVector2D TTTWidget::screenPosition(int c, int i, int size)
 {
     int xpos = 0;

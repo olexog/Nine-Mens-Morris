@@ -30,6 +30,7 @@ private:
 private slots:
     void on_pushButtonConnect_clicked();
     void on_pushButtonDisconnect_clicked();
+    void on_pushButtonStartNewGame_clicked();
 };
 
 #endif // MAINWINDOW_H
