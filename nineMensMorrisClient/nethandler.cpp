@@ -78,7 +78,7 @@ void NetHandler::slotDisconnected()
 // Amikor egy csomag erkezik, akkor a szignal hatasara ez a slot hivodik meg.
 void NetHandler::slotReadyRead()
 {
-    QByteArray buf = m_pSocket->read(28);
+    QByteArray buf = m_pSocket->read(29);
     m_pSocket->readAll();
 
     QString filename = "/home/olexo/Desktop/log.txt";
@@ -86,7 +86,7 @@ void NetHandler::slotReadyRead()
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "CLIENT:reading ";
-        for (int i = 0; i < 28; ++i)
+        for (int i = 0; i < 29; ++i)
         {
             stream << (int)buf[i];
         }
@@ -99,10 +99,11 @@ void NetHandler::slotReadyRead()
     receivedSituation.manColor = static_cast<Game::ManColor>(buf[1]);
     receivedSituation.whiteMenToBePlaced = (int)buf[2];
     receivedSituation.blackMenToBePlaced = (int)buf[3];
+    bool opponentConnected = (bool)buf[4];
 
     for (int i = 0; i < 24; ++i)
     {
-        receivedSituation.table[i] = buf[i + 4];
+        receivedSituation.table[i] = buf[i + 5];
     }
 
     emit signalStateReceived(receivedSituation);

@@ -8,7 +8,8 @@ public:
     unsigned char gameTable[24];
     int whiteMenToBePlaced;
     int blackMenToBePlaced;
-    enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6, Finished = 7};
+    enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6,
+                     Finished = 7, ReadyForNewGame = 8};
     GameState gameState;
 };
 

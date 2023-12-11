@@ -21,6 +21,7 @@ public slots:
 
 protected:
     Game game;
+    bool opponentConnected;
     unsigned char m_State[9];
     unsigned char gameTable[24];
     char selectedMan = -1;

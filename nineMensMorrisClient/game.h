@@ -10,7 +10,8 @@ public:
     int blackMenToBePlaced;
     enum ManColor {Empty = 0, Black = 1, White = 2 };
     ManColor manColor;
-    enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6, Finished = 7};
+    enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6,
+                     Finished = 7, ReadyForNewGame = 8};
     GameState gameState;
     bool placeMan(int position);
     bool moveMan(int fromPos, int toPos);
