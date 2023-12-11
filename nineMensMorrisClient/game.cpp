@@ -8,18 +8,8 @@ Game::Game() {
         this->table[i] = 0;
     }
 
-    for (int i = 0; i < 8; i++)
-    {
-        this->table[i] = 1;
-    }
-
-    for (int i = 10; i < 18; i++)
-    {
-        this->table[i] = 2;
-    }
-
-    this->whiteMenToBePlaced = 1;
-    this->blackMenToBePlaced = 1;
+    this->whiteMenToBePlaced = 9;
+    this->blackMenToBePlaced = 9;
 }
 
 bool Game::placeMan(int position){
@@ -99,6 +89,10 @@ bool Game::placeMan(int position){
         }
     }
 
+    // game is won
+    if (this->winner() != Empty)
+        this->gameState = Finished;
+
     return true;
 }
 
@@ -134,7 +128,7 @@ bool Game::moveMan(int fromPos, int toPos)
         return false;
     }
 
-    if (!isNeighbour(fromPos, toPos))
+    if (manCount(this->manColor) > 3 && !isNeighbour(fromPos, toPos))
     {
         qDebug() << "Moving only to adjacent cells!";
         return false;
@@ -168,6 +162,10 @@ bool Game::moveMan(int fromPos, int toPos)
             this->gameState = GameState::WhiteMoves;
         }
     }
+
+    // game is won
+    if (this->winner() != Empty)
+        this->gameState = Finished;
 
     return true;
 }
@@ -216,6 +214,10 @@ bool Game::removeMan(int pos)
             this->gameState = WhiteMoves;
     }
 
+    // game is won
+    if (this->winner() != Empty)
+        this->gameState = Finished;
+
     return true;
 }
 
@@ -230,7 +232,6 @@ bool Game::closedMillOnPosition(int pos)
             if ((this->table[MILLS[i][0]] != ManColor::Empty) &&
                 (this->table[MILLS[i][0]] == this->table[MILLS[i][1]]) && (this->table[MILLS[i][0]] == this->table[MILLS[i][2]]))
                 return true;
-
         }
     }
 
@@ -259,10 +260,81 @@ bool Game::isNeighbour(int pos1, int pos2)
     // same sqare
     if (c1 == c2)
     {
+        // mills along squares
         return abs(k1 - k2) == 1 || abs(k1 - k2) == 7;
     }
     else
     {
-        return k1 == k2 && abs(c1 - c2) == 1;
+        // square connecting mills
+        return (k1 % 2 == 1) && k1 == k2 && abs(c1 - c2) == 1;
     }
+}
+
+int Game::manCount(ManColor color)
+{
+    int count = 0;
+    for (int i = 0; i < POSITION_COUNT; i++)
+    {
+        if (this->table[i] == (int)color)
+            count++;
+    }
+
+    return count;
+}
+
+bool Game::canMove(ManColor color)
+{
+    if (this->manCount(color) < 3)
+    {
+        qDebug() << "Game has already finished.";
+        return false;
+    }
+
+    // if jumping, always can move (24-9-3>0))
+    if (this->manCount(color) == 3)
+        return true;
+
+    for (int i = 0; i < POSITION_COUNT; i++)
+    {
+        for (int j = 0; j < POSITION_COUNT; j++)
+        {
+            if (i == j)
+                continue;
+
+            if (isNeighbour(i, j))
+            {
+                if (this->table[i] == (int)color && this->table[j] == (int)Empty)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+Game::ManColor Game::winner()
+{
+    // game cannot be won in placing state
+    if (this->gameState == WhitePlaces || this->gameState == BlackPlaces)
+        return Empty;
+
+    // less than 3 men
+    if (this->manCount(White) < 3)
+        return Black;
+    else if (this->manCount(Black) < 3)
+        return White;
+
+    // mill closed on 3 men
+    if (this->manCount(White) == 3 && (this->gameState == BlackRemoves || this->gameState == Finished))
+        return Black;
+    else if (this->manCount(Black) == 3 && (this->gameState == WhiteRemoves || this->gameState == Finished))
+        return White;
+
+    // cannot move
+    if ((this->gameState == WhiteMoves || this->gameState == Finished) && !this->canMove(White))
+        return Black;
+    else if ((this->gameState == BlackMoves || this->gameState == Finished) && !this->canMove(Black))
+        return White;
+
+    return Empty;
 }

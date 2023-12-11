@@ -1,5 +1,6 @@
 #include <QPainter>
 #include <QMouseEvent>
+#include <QMessageBox>
 #include "tttwidget.h"
 #include "game.h"
 
@@ -23,6 +24,7 @@ void TTTWidget::slotStateReceived(Game receivedSituation)
 {
     this->game = receivedSituation;
     update();
+    checkForWin();
 }
 
 QVector2D TTTWidget::screenPosition(int c, int i, int size)
@@ -123,8 +125,6 @@ void TTTWidget::paintEvent(QPaintEvent* e)
 
 void TTTWidget::mousePressEvent(QMouseEvent* e)
 {
-    //if (!m_bCPlayer) return;
-
     int w = this->width();
     int h = this->height();
 
@@ -155,7 +155,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
         {
             if (this->game.placeMan(selection))
             {
-                emit signalSendNewState(this->game);
+                gameStateChanged();
             }
         }
 
@@ -164,7 +164,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
         {
             if (this->game.removeMan(selection))
             {
-                emit signalSendNewState(this->game);
+                gameStateChanged();
             }
         }
 
@@ -182,7 +182,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
                 // move man
                 else if (this->game.moveMan(this->selectedMan, selection))
                 {
-                    emit signalSendNewState(this->game);
+                    gameStateChanged();
                     this->selectedMan = -1;
                 }
             }
@@ -197,4 +197,24 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
     }
 
     this->update();
+}
+
+void TTTWidget::checkForWin()
+{
+    if (this->game.gameState == Game::Finished)
+    {
+        QMessageBox msgBox;
+        if (this->game.winner() == Game::White)
+            msgBox.setText("Winner is: WHITE");
+        else if (this->game.winner() == Game::Black)
+            msgBox.setText("Winner is: BLACK");
+        else
+            msgBox.setText("no winner");
+        msgBox.exec();
+    }
+}
+
+void TTTWidget::gameStateChanged()
+{
+    emit signalSendNewState(this->game);
 }

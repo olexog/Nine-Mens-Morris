@@ -34,6 +34,8 @@ protected:
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void paintEvent(QPaintEvent* e);
     QVector2D screenPosition(int c, int i, int size);
+    void gameStateChanged();
+    void checkForWin();
 
 };
 

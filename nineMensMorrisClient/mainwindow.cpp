@@ -20,9 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(m_pNetHandler,
             SIGNAL(signalStateReceived(Game)),
-            ui->tttwidget,
+            ui->nmmwidget,
             SLOT(slotStateReceived(Game)));
-    connect(ui->tttwidget,
+    connect(ui->nmmwidget,
             SIGNAL(signalSendNewState(Game)),
             m_pNetHandler,
             SLOT(slotSendNewState(Game)));
@@ -102,7 +102,7 @@ void MainWindow::on_actionConnect_triggered()
     if(ok && !addr.isEmpty())
     {
         m_pNetHandler->Connect(addr);
-        ui->tttwidget->slotInit();
+        ui->nmmwidget->slotInit();
     }
 }
 
