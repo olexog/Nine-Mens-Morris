@@ -96,16 +96,16 @@ void Server::slotDisconnected()
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead1()
 {
-    QByteArray buf = m_pSocket1->read(28);
-    if (buf.length() == 28)
+    QByteArray buf = m_pSocket1->read(RECEIVE_HEADER_LENGTH + TABLE_SIZE);
+    if (buf.length() == RECEIVE_HEADER_LENGTH + TABLE_SIZE)
         ParsePkg(1, buf);
 }
 
 // Csomag erkezesenek lekezelese.
 void Server::slotReadyRead2()
 {
-    QByteArray buf = m_pSocket2->read(28);
-    if (buf.length() == 28)
+    QByteArray buf = m_pSocket2->read(RECEIVE_HEADER_LENGTH + TABLE_SIZE);
+    if (buf.length() == RECEIVE_HEADER_LENGTH + TABLE_SIZE)
         ParsePkg(2, buf);
 }
 
@@ -121,34 +121,25 @@ void Server::Init()
 
 void Server::SendState()
 {
-    QByteArray buf(29,0);
+    QString filename = "/home/olexo/Desktop/log.txt";
+    QFile file(filename);
+
+    QByteArray buf(SEND_HEADER_LENGTH + TABLE_SIZE,0);
     buf[0] = (quint8)this->game.gameState;
     buf[1] = 1; // black
     buf[2] = (quint8)this->game.whiteMenToBePlaced;
     buf[3] = (quint8)this->game.blackMenToBePlaced;
     buf[4] = (quint8)true;
-    for (int i = 0; i < 24; ++i) {
-        buf[i + 5] = this->game.gameTable[i];
-    }
-
-    QByteArray buf2(29,0);
-    buf2[0] = (quint8)this->game.gameState;
-    buf2[1] = 2; // white
-    buf2[2] = (quint8)this->game.whiteMenToBePlaced;
-    buf2[3] = (quint8)this->game.blackMenToBePlaced;
-    buf2[4] = (quint8)true;
-    for (int i = 0; i < 24; ++i) {
-        buf2[i + 5] = this->game.gameTable[i];
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        buf[i + SEND_HEADER_LENGTH] = this->game.gameTable[i];
     }
 
     m_pSocket1->write(buf);
 
-    QString filename = "/home/olexo/Desktop/log.txt";
-    QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
         stream << "SERVER:writing to socket 1: buf:";
-        for (int i = 0; i < 29; ++i)
+        for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
         {
             stream << (int)buf[i];
         }
@@ -156,14 +147,15 @@ void Server::SendState()
     }
     file.close();
 
-    m_pSocket2->write(buf2);
+    buf[1] = 2; // white
 
+    m_pSocket2->write(buf);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&file);
-        stream << "SERVER:writing to socket 2: buf:";
-        for (int i = 0; i < 29; ++i)
+        stream << "SERVER:writing to socket 1: buf:";
+        for (int i = 0; i < SEND_HEADER_LENGTH + TABLE_SIZE; ++i)
         {
-            stream << (int)buf2[i];
+            stream << (int)buf[i];
         }
         stream << "\n";
     }
@@ -179,9 +171,9 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
     this->game.whiteMenToBePlaced = (int)pkg[2];
     this->game.blackMenToBePlaced = (int)pkg[3];
 
-    for(int i = 0; i < 24; i++)
+    for(int i = 0; i < TABLE_SIZE; i++)
     {
-        this->game.gameTable[i] = pkg[4 + i];
+        this->game.gameTable[i] = pkg[RECEIVE_HEADER_LENGTH + i];
     }
 
     //CheckEnd();

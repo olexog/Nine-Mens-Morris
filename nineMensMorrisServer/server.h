@@ -41,6 +41,9 @@ protected:
     int m_CPlayer;
     int m_End;
     Game game;
+    const int SEND_HEADER_LENGTH = 5;
+    const int RECEIVE_HEADER_LENGTH = 4;
+    const int TABLE_SIZE = 24;
 
 };
 
