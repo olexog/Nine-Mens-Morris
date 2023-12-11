@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (QCoreApplication::arguments().count() > 1)
     {
         QString arg = QCoreApplication::arguments().at(1);
-        m_pNetHandler->Connect(arg);
+        connectToServer(arg);
     }
 }
 
@@ -92,21 +92,38 @@ void MainWindow::slotEnd(int res)
     QMessageBox::information(this, "Game end", msg);
 }
 
-void MainWindow::on_actionConnect_triggered()
+void MainWindow::connectToServer(QString addr)
+{
+    m_pNetHandler->Connect(addr);
+    ui->nmmwidget->slotInit();
+    ui->pushButtonConnect->setEnabled(false);
+    ui->pushButtonDisconnect->setEnabled(true);
+}
+
+void MainWindow::disconnectFromServer()
+{
+    m_pNetHandler->slotDisconnected();
+    ui->pushButtonConnect->setEnabled(true);
+    ui->pushButtonDisconnect->setEnabled(false);
+    ui->pushButtonStartNewGame->setEnabled(false);
+}
+
+void MainWindow::on_pushButtonConnect_clicked()
 {
     // Bekerjuk a masik gep cimet. Ha ez nem nulla hosszusagu, akkor kapcsolodunk hozza.
     bool ok;
     QString addr = QInputDialog::getText(this,
-      "Server address", "Please enter the server host:",
-      QLineEdit::Normal, "localhost", &ok);
+                                         "Server address", "Please enter the server host:",
+                                         QLineEdit::Normal, "localhost", &ok);
     if(ok && !addr.isEmpty())
     {
-        m_pNetHandler->Connect(addr);
-        ui->nmmwidget->slotInit();
+        connectToServer(addr);
     }
 }
 
-void MainWindow::on_actionStop_triggered()
+
+void MainWindow::on_pushButtonDisconnect_clicked()
 {
-    m_pNetHandler->slotDisconnected();
+    disconnectFromServer();
 }
+

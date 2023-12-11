@@ -24,10 +24,12 @@ public slots:
 private:
     Ui::MainWindow *ui;
     NetHandler* m_pNetHandler;
+    void connectToServer(QString addr);
+    void disconnectFromServer();
 
 private slots:
-    void on_actionStop_triggered();
-    void on_actionConnect_triggered();
+    void on_pushButtonConnect_clicked();
+    void on_pushButtonDisconnect_clicked();
 };
 
 #endif // MAINWINDOW_H
