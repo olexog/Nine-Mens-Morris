@@ -9,7 +9,7 @@ A program az alábbi funkciókkal fog rendelkezni:
 * Grafikus felület Qt-ban megvalósítva.
 * Helytelen lépés ellenőrzése.
 * Játék állapotának követése.
-* Jtékszabályok instrukcióinak kiírása
+* Játékszabályok instrukcióinak kiírása
 * TCP kommunikáció logolása
 
 # Megvalósított program
