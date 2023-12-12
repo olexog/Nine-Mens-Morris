@@ -2,26 +2,39 @@
 #define GAME_H
 
 #include <QString>
+#include <QList>
 
 class Game
 {
 public:
-    Game();
-    unsigned char table[24];
-    int whiteMenToBePlaced;
-    int blackMenToBePlaced;
     enum ManColor {Empty = 0, Black = 1, White = 2 };
-    ManColor manColor;
     enum GameState {WhitePlaces = 1, BlackPlaces = 2, WhiteMoves = 3, BlackMoves = 4, WhiteRemoves = 5, BlackRemoves = 6,
                      Finished = 7, ReadyForNewGame = 8};
-    GameState gameState;
+
+    Game();
+    Game(QList<ManColor> table, int _whiteMenToBePlaced, int _blackMenToBePlaced, ManColor _manColor, GameState _gameState);
     bool placeMan(int position);
     bool moveMan(int fromPos, int toPos);
     bool removeMan(int pos);
     ManColor winner();
     QString getMessage();
     bool canJump();
+
+    GameState getState();
+    void setState(GameState newGameState);
+
+    ManColor getManColor();
+    ManColor getColorAt(int i);
+    int getWhiteMenToBePlaced();
+    int getBlackMenToBePlaced();
 private:
+    GameState gameState;
+    ManColor manColor;
+    int whiteMenToBePlaced;
+    int blackMenToBePlaced;
+
+    QList<ManColor> table;
+
     bool closedMillOnPosition(int pos);
     int numberOfFreeMan(ManColor color);
     bool isNeighbour(int pos1, int pos2);

@@ -19,7 +19,6 @@ signals:
 public slots:
     void slotInit();
     void slotStateReceived(Game receivedSituation);
-    void slotNewGame();
 
 protected:
     Game game;
@@ -32,7 +31,6 @@ protected:
     float rectSpace = (1 - 2 * borderMargin) / 6.0f;
     float manRelSize = 0.08f; // related to size of game table
 
-protected:
     void Init();
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void paintEvent(QPaintEvent* e);

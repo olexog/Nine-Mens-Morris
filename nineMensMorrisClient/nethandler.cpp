@@ -1,5 +1,7 @@
 #include "nethandler.h"
 
+#include <QList>
+
 NetHandler::NetHandler(QObject *parent) :
     QObject(parent)
 {
@@ -92,17 +94,17 @@ void NetHandler::slotReadyRead()
         stream << "\n";
     }
 
-    Game receivedSituation = Game();
-
-    receivedSituation.gameState = static_cast<Game::GameState>(buf[0]);
-    receivedSituation.manColor = static_cast<Game::ManColor>(buf[1]);
-    receivedSituation.whiteMenToBePlaced = (int)buf[2];
-    receivedSituation.blackMenToBePlaced = (int)buf[3];
-
+    Game::GameState gameState = static_cast<Game::GameState>(buf[0]);
+    Game::ManColor manColor = static_cast<Game::ManColor>(buf[1]);
+    int whiteMenToBePlaced = (int)buf[2];
+    int blackMenToBePlaced = (int)buf[3];
+    QList<Game::ManColor> table = QList<Game::ManColor>(TABLE_SIZE);
     for (int i = 0; i < TABLE_SIZE; ++i)
     {
-        receivedSituation.table[i] = buf[i + HEADER_LENGTH];
+        table[i] = (Game::ManColor)buf[i + HEADER_LENGTH];
     }
+
+    Game receivedSituation = Game(table, whiteMenToBePlaced, blackMenToBePlaced, manColor, gameState);
 
     emit signalStateReceived(receivedSituation);
 
@@ -119,14 +121,14 @@ void NetHandler::slotSendNewState(Game newSituation)
     // Osszeallitjuk a protokoll szerinti uzenetet.
     QByteArray buf(HEADER_LENGTH + TABLE_SIZE,0);
 
-    buf[0] = (quint8)newSituation.gameState;
-    buf[1] = (quint8)newSituation.manColor;
-    buf[2] = (quint8)newSituation.whiteMenToBePlaced;
-    buf[3] = (quint8)newSituation.blackMenToBePlaced;
+    buf[0] = (quint8)newSituation.getState();
+    buf[1] = (quint8)newSituation.getManColor();
+    buf[2] = (quint8)newSituation.getWhiteMenToBePlaced();
+    buf[3] = (quint8)newSituation.getBlackMenToBePlaced();
 
     for (int i = 0; i < TABLE_SIZE; i++)
     {
-        buf[i + HEADER_LENGTH] = (quint8)newSituation.table[i];
+        buf[i + HEADER_LENGTH] = (quint8)newSituation.getColorAt(i);
     }
 
     // A kliens socketen keresztul elkuldjuk a masik programnak.

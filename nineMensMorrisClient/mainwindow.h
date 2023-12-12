@@ -30,7 +30,6 @@ private:
 private slots:
     void on_pushButtonConnect_clicked();
     void on_pushButtonDisconnect_clicked();
-    void on_pushButtonStartNewGame_clicked();
     void slotUpdateLabels(QString colorInfo, QString command, QString gameInfo);
 };
 

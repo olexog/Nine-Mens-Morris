@@ -3,13 +3,24 @@
 #include <QDebug>
 
 Game::Game() {
+    table = QList<ManColor>(24);
+
     for (int i = 0; i < 24; i++)
     {
-        this->table[i] = 0;
+        this->table[i] = Empty;
     }
 
     this->whiteMenToBePlaced = 9;
     this->blackMenToBePlaced = 9;
+}
+
+Game::Game(QList<ManColor> _table, int _whiteMenToBePlaced, int _blackMenToBePlaced, ManColor _manColor, GameState _gameState)
+{
+    this->table=_table;
+    this->whiteMenToBePlaced = _whiteMenToBePlaced;
+    this->blackMenToBePlaced = _blackMenToBePlaced;
+    this->manColor = _manColor;
+    this->gameState = _gameState;
 }
 
 QString Game::getMessage()
@@ -148,7 +159,7 @@ bool Game::moveMan(int fromPos, int toPos)
     // moving
 
     this->table[toPos] = this->table[fromPos];
-    this->table[fromPos] = (int)ManColor::Empty;
+    this->table[fromPos] = ManColor::Empty;
 
     // game state change
     if (this->gameState == GameState::WhiteMoves)
@@ -210,7 +221,7 @@ bool Game::removeMan(int pos)
         return false;
     }
 
-    this->table[pos] = (int)Empty;
+    this->table[pos] = Empty;
 
     if (this->gameState == WhiteRemoves)
     {
@@ -328,7 +339,7 @@ bool Game::canMove(ManColor color)
 Game::ManColor Game::winner()
 {
     // game cannot be won in placing state
-    if (this->gameState == WhitePlaces || this->gameState == BlackPlaces)
+    if (this->whiteMenToBePlaced > 0 || this->blackMenToBePlaced > 0)
         return Empty;
 
     // less than 3 men
@@ -355,4 +366,34 @@ Game::ManColor Game::winner()
 bool Game::canJump()
 {
     return manCount(manColor) == 3;
+}
+
+Game::GameState Game::getState()
+{
+    return this->gameState;
+}
+
+void Game::setState(GameState newGameState)
+{
+    this->gameState = newGameState;
+}
+
+Game::ManColor Game::getManColor()
+{
+    return this->manColor;
+}
+
+Game::ManColor Game::getColorAt(int i)
+{
+    return (Game::ManColor)this->table[i];
+}
+
+int Game::getWhiteMenToBePlaced()
+{
+    return this->whiteMenToBePlaced;
+}
+
+int Game::getBlackMenToBePlaced()
+{
+    return this->blackMenToBePlaced;
 }

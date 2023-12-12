@@ -28,22 +28,16 @@ void TTTWidget::slotStateReceived(Game receivedSituation)
     checkForWin();
 }
 
-void TTTWidget::slotNewGame()
-{
-    this->game.gameState = Game::ReadyForNewGame;
-    gameStateChanged();
-}
-
 void TTTWidget::updateLabels()
 {
-    QString colorInfo = game.manColor == Game::White ? "WHITE" : "BLACK";
+    QString colorInfo = game.getManColor() == Game::White ? "WHITE" : "BLACK";
 
     QString directions = "";
 
-    if (game.gameState == Game::WhitePlaces || game.gameState == Game::BlackPlaces)
+    if (game.getState() == Game::WhitePlaces || game.getState() == Game::BlackPlaces)
     {
-        if ((game.gameState == Game::WhitePlaces && game.manColor == Game::White) ||
-            (game.gameState == Game::BlackPlaces && game.manColor == Game::Black))
+        if ((game.getState() == Game::WhitePlaces && game.getManColor() == Game::White) ||
+            (game.getState() == Game::BlackPlaces && game.getManColor() == Game::Black))
         {
             directions = "Place a piece on an empty slot!";
         }
@@ -52,10 +46,10 @@ void TTTWidget::updateLabels()
             directions = "Waiting for other player to place a piece...";
         }
     }
-    else if (game.gameState == Game::WhiteMoves || game.gameState == Game::BlackMoves)
+    else if (game.getState() == Game::WhiteMoves || game.getState() == Game::BlackMoves)
     {
-        if ((game.gameState == Game::WhiteMoves && game.manColor == Game::White) ||
-            (game.gameState == Game::BlackMoves && game.manColor == Game::Black))
+        if ((game.getState() == Game::WhiteMoves && game.getManColor() == Game::White) ||
+            (game.getState() == Game::BlackMoves && game.getManColor() == Game::Black))
         {
             if (game.canJump())
                 directions = "Move a piece to any emtpy slot. You are free to jump now.";
@@ -67,10 +61,10 @@ void TTTWidget::updateLabels()
             directions = "Waiting for other player to move a piece...";
         }
     }
-    else if (game.gameState == Game::WhiteRemoves || game.gameState == Game::BlackRemoves)
+    else if (game.getState() == Game::WhiteRemoves || game.getState() == Game::BlackRemoves)
     {
-        if ((game.gameState == Game::WhiteRemoves && game.manColor == Game::White) ||
-            (game.gameState == Game::BlackRemoves && game.manColor == Game::Black))
+        if ((game.getState() == Game::WhiteRemoves && game.getManColor() == Game::White) ||
+            (game.getState() == Game::BlackRemoves && game.getManColor() == Game::Black))
         {
             directions = "Remove a piece from the opponent's pieces! Free men first.";
         }
@@ -149,14 +143,14 @@ void TTTWidget::paintEvent(QPaintEvent* e)
             painter.drawEllipse(pos.x() - emptyCircleSize / 2, pos.y() - emptyCircleSize / 2, emptyCircleSize, emptyCircleSize);
 
             int manIndex = 8 * c + i;
-            if (this->game.table[manIndex] == 1 || this->game.table[manIndex] == 2)
+            if (game.getColorAt(manIndex) != Game::Empty)
             {
-                if (this->game.table[manIndex] == 1)
+                if (game.getColorAt(manIndex) == Game::Black)
                 {
                     painter.setPen(blackManPen);
                     painter.setBrush(blackManBrush);
                 }
-                else
+                else if (game.getColorAt(manIndex) == Game::White)
                 {
                     painter.setPen(whiteManPen);
                     painter.setBrush(whiteManBrush);
@@ -206,8 +200,8 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
 
     if (selection > -1)
     {
-        if ((this->game.gameState == Game::GameState::WhitePlaces && this->game.manColor == Game::ManColor::White) ||
-            (this->game.gameState == Game::GameState::BlackPlaces && this->game.manColor == Game::ManColor::Black))
+        if ((this->game.getState() == Game::GameState::WhitePlaces && this->game.getManColor() == Game::ManColor::White) ||
+            (this->game.getState() == Game::GameState::BlackPlaces && this->game.getManColor() == Game::ManColor::Black))
         {
             if (this->game.placeMan(selection))
             {
@@ -215,8 +209,8 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             }
         }
 
-        if ((this->game.gameState == Game::WhiteRemoves && this->game.manColor == Game::White) ||
-            (this->game.gameState == Game::BlackRemoves && this->game.manColor == Game::Black))
+        if ((this->game.getState() == Game::WhiteRemoves && this->game.getManColor() == Game::White) ||
+            (this->game.getState() == Game::BlackRemoves && this->game.getManColor() == Game::Black))
         {
             if (this->game.removeMan(selection))
             {
@@ -224,8 +218,8 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             }
         }
 
-        if ((this->game.gameState == Game::GameState::WhiteMoves && this->game.manColor == Game::ManColor::White) ||
-            (this->game.gameState == Game::GameState::BlackMoves && this->game.manColor == Game::ManColor::Black))
+        if ((this->game.getState() == Game::GameState::WhiteMoves && this->game.getManColor() == Game::ManColor::White) ||
+            (this->game.getState() == Game::GameState::BlackMoves && this->game.getManColor() == Game::ManColor::Black))
         {
             // destination is selected
             if (this->selectedMan > -1)
@@ -245,7 +239,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
             // select source position
             else
             {
-                if (this->game.table[selection] == (int)this->game.manColor)
+                if (game.getColorAt(selection) == (int)this->game.getManColor())
                     this->selectedMan = selection;
             }
 
@@ -258,7 +252,7 @@ void TTTWidget::mousePressEvent(QMouseEvent* e)
 
 void TTTWidget::checkForWin()
 {
-    if (this->game.gameState == Game::Finished)
+    if (this->game.getState() == Game::Finished)
     {
         QMessageBox msgBox;
         if (this->game.winner() == Game::White)

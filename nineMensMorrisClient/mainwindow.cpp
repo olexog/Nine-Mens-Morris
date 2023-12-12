@@ -26,8 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(signalSendNewState(Game)),
             m_pNetHandler,
             SLOT(slotSendNewState(Game)));
-    connect(ui->pushButtonStartNewGame, SIGNAL(clicked()),
-            ui->nmmwidget, SLOT(slotNewGame()));
 
     connect(ui->nmmwidget, SIGNAL(signalUpdateLabels(QString,QString,QString)),
             this, SLOT(slotUpdateLabels(QString,QString,QString)));
@@ -87,21 +85,6 @@ void MainWindow::slotConnectionStatus(int status)
 // A jatek vege jelzes lekezelese.
 void MainWindow::slotEnd(int res)
 {
-    // Osszeallitjuk a megjelenitendo uzenetet a jelzes parametere alapjan.
-    QString msg;
-    switch(res)
-    {
-    case NetHandler::winnerX:
-        msg = "The winner is X!";
-        break;
-    case NetHandler::winnerO:
-        msg = "The winner is O!";
-        break;
-    case NetHandler::drew:
-        msg = "Game End!";
-        break;
-    }
-    QMessageBox::information(this, "Game end", msg);
 }
 
 void MainWindow::connectToServer(QString addr)
@@ -117,7 +100,6 @@ void MainWindow::disconnectFromServer()
     m_pNetHandler->slotDisconnected();
     ui->pushButtonConnect->setEnabled(true);
     ui->pushButtonDisconnect->setEnabled(false);
-    ui->pushButtonStartNewGame->setEnabled(false);
 }
 
 void MainWindow::on_pushButtonConnect_clicked()
@@ -138,10 +120,3 @@ void MainWindow::on_pushButtonDisconnect_clicked()
 {
     disconnectFromServer();
 }
-
-
-void MainWindow::on_pushButtonStartNewGame_clicked()
-{
-
-}
-

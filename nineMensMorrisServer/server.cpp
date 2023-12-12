@@ -107,8 +107,6 @@ void Server::slotSocket1Disconnected()
         m_pSocket1->deleteLater();
         m_pSocket1 = NULL;
     }
-    player1WaitingForStart = false;
-    SendState();
 }
 
 void Server::slotSocket2Disconnected()
@@ -117,8 +115,6 @@ void Server::slotSocket2Disconnected()
         m_pSocket2->deleteLater();
         m_pSocket2 = NULL;
     }
-    player2WaitingForStart = false;
-    SendState();
 }
 
 // Csomag erkezesenek lekezelese.
@@ -187,8 +183,6 @@ void Server::SendState()
 
 void Server::ParsePkg(int pl, const QByteArray& pkg)
 {
-    //if (pl != m_CPlayer) return;
-
     this->game.gameState = static_cast<Game::GameState>(pkg[0]);
 
     this->game.whiteMenToBePlaced = (int)pkg[2];
@@ -199,33 +193,6 @@ void Server::ParsePkg(int pl, const QByteArray& pkg)
         this->game.gameTable[i] = pkg[HEADER_LENGTH + i];
     }
 
-    if (pl == 1)
-        player1WaitingForStart = this->game.gameState == Game::ReadyForNewGame;
-    else if (pl == 2)
-        player2WaitingForStart = this->game.gameState == Game::ReadyForNewGame;
-
-    if (player1WaitingForStart && player2WaitingForStart)
-    {
-        StartGame();
-    }
-    else
-    {
-        SendState();
-    }
-
-    /*int i = y*3+x;
-    if (m_State[i] == 0) {
-        m_State[i] = pl;
-        m_CPlayer = (m_CPlayer % 2) + 1;
-
-        CheckEnd();
-        SendState();
-
-        if (m_End != 0) {
-            m_CPlayer = 0;
-            QTimer::singleShot(100, this,
-                               SLOT(slotDisconnected()));
-        }
-    }*/
+    SendState();
 
 }
